@@ -1,0 +1,27 @@
+# 鉴权配置
+auth:
+  # 设置密码
+  existingSecret: mysql
+  # 创建自定义数据库(以Dashboard为例)以及新建对应用户
+  database: "dashboard"
+  username: "dashboard"
+# 单机模式
+architecture: standalone
+# 数据库配置
+primary:
+  # 设置持久化存储空间
+  persistence:
+    size: 8Gi
+  extraEnvVars:
+    # 设置时区
+    - name: TZ
+      value: "Asia/Shanghai"
+    # 设置编码集
+    - name: DEFAULT_CHARSET
+      value: "utf8mb4"
+    - name: DEFAULT_COLLATION
+      value: "utf8mb4_unicode_ci"
+# 使能`Network Policy`并允许任意外部来源的访问
+networkPolicy:
+  enabled: true
+  allowExternal: true

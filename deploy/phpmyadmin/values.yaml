@@ -1,0 +1,9 @@
+# 配置待访问的数据库服务(通过SVC域名方式)
+db:
+  # 主机
+  host: mysql-primary.homelab.svc.cluster.local
+
+# 使能Ingress并设置 `phpmyadmin.homelab.com` 作为访问域名
+ingress:
+  enabled: true
+  hostname: phpmyadmin.homelab.com
