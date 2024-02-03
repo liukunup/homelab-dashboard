@@ -29,14 +29,14 @@ helm install -f mysql/values.yaml mysql bitnami/mysql -n $K8S_NS
 helm install -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin -n $K8S_NS
 
 # Grafana
-kubectl apply -f grafana.yaml -n $K8S_NS
+kubectl apply -f grafana/grafana.yaml -n $K8S_NS
 ```
 
 3. 卸载
 
 ```shell
 # Grafana
-kubectl delete -f grafana.yaml -n $K8S_NS
+kubectl delete -f grafana/grafana.yaml -n $K8S_NS
 
 # phpMyAdmin
 helm uninstall phpmyadmin -n $K8S_NS
@@ -45,6 +45,12 @@ helm uninstall phpmyadmin -n $K8S_NS
 helm uninstall mysql -n $K8S_NS
 # MySQL password
 kubectl delete -f mysql/password.yaml -n $K8S_NS
+```
+
+4. 查看`Pod`状态
+
+```shell
+kubectl get all -n $K8S_NS
 ```
 
 ## 体验试用
