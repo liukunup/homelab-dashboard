@@ -6,6 +6,8 @@
 
 [phpMyAdmin](https://artifacthub.io/packages/helm/bitnami/phpmyadmin)
 
+如果使用`Docker Desktop`，需要安装`Ingress`，可以参考[Mac - Docker Desktop & Kubernetes.md](Mac+Docker-Desktop+Kubernetes.md)
+
 ## 部署步骤
 
 1. 创建命名空间
