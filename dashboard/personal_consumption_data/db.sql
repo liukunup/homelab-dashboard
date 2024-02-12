@@ -1,10 +1,14 @@
 -- --------------------------------------------------------
 
 --
--- 数据库 `bills`
+-- 数据库 `dashboard`
 --
 
-CREATE DATABASE IF NOT EXISTS `bills`
+CREATE DATABASE IF NOT EXISTS `dashboard`
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+ALTER DATABASE `dashboard`
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_unicode_ci;
 
@@ -21,9 +25,9 @@ CREATE TABLE `transaction` (
   `counterparty` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '交易对方',
   `account` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '对方账号',
   `goods` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '商品',
-  `income_or_expenditure` enum('收入','支出','不计收支') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收/支',
+  `income_or_expenditure` enum('收入','支出','不计收支','/') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收/支',
   `amount` double NOT NULL COMMENT '金额',
-  `channel` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收/付款方式',
+  `channel` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '收/付款方式',
   `status` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '交易状态',
   `po_transaction` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '交易订单号',
   `po_seller` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '商家订单号',
@@ -37,7 +41,7 @@ CREATE TABLE `transaction` (
 -- --------------------------------------------------------
 
 --
--- 交易订单号+来源 确保记录唯一
+-- 交易订单号 确保记录唯一
 --
 
-ALTER TABLE `transaction` ADD UNIQUE(`po_transaction`, `source`);
+ALTER TABLE `transaction` ADD UNIQUE(`po_transaction`);

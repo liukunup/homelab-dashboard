@@ -71,3 +71,14 @@ kubectl get all -n $K8S_NS
 
 - [phpmyadmin.homelab.com](http://phpmyadmin.homelab.com/)
 - [dashboard.homelab.com](http://dashboard.homelab.com/)
+
+## 如何连接到数据库?
+
+- 集群代理到本地
+
+```shell
+# 导出环境变量
+export K8S_NS=homelab-dashboard
+# 代理到本地
+kubectl port-forward -n $K8S_NS service/mysql 3306:3306
+```

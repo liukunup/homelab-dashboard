@@ -3,3 +3,7 @@
 
 # Mac
 **/.DS_Store
+
+# Business
+**/*.csv
+**/*.xlsx
