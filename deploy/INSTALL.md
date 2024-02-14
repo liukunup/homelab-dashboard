@@ -14,9 +14,9 @@
 
 ```shell
 # 创建命名空间
-kubectl create namespace homelab-dashboard
+kubectl create namespace homelab
 # 导出环境变量
-export K8S_NS=homelab-dashboard
+export K8S_NS=homelab
 ```
 
 2. 安装
@@ -78,7 +78,7 @@ kubectl get all -n $K8S_NS
 
 ```shell
 # 导出环境变量
-export K8S_NS=homelab-dashboard
+export K8S_NS=homelab
 # 代理到本地
-kubectl port-forward -n $K8S_NS service/mysql 3306:3306
+kubectl port-forward -n $K8S_NS service/mysql-primary 3306:3306
 ```
