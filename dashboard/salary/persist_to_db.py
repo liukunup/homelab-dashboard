@@ -2,11 +2,9 @@
 # author:      Liu Kun
 # email:       liukunup@outlook.com
 # timestamp:   2024/2/7 00:28
-# description: 个人薪资单同步到数据库
+# description: 薪酬福利同步到数据库
 
-import re
 import os
-import typing
 import argparse
 import pandas as pd
 from sqlalchemy import create_engine
@@ -49,8 +47,8 @@ def insert_on_conflict_update(pd_table, conn, keys, data_iter):
 
 def salary_excel_parser(excel_file, engine=None):
     """
-    薪资收入等 同步器
-    :param excel_file: 薪资收入记录文件
+    薪酬福利等 同步器
+    :param excel_file: 薪酬福利记录文件
     :param engine:     数据库引擎
     :return: 不涉及
     """
@@ -66,19 +64,19 @@ def salary_excel_parser(excel_file, engine=None):
 
 
 def app():
-    """ 个人薪资单 """
+    """ 薪酬福利 """
     # 解析从命令行输入的参数
     args = args_parser()
     # 创建数据库引擎
     engine = create_engine(f'mysql+pymysql://{args.username}:{args.password}@{args.host}:{args.port}/{args.database}',
                            encoding='utf-8')
     # 过滤对账单文件
-    salary_excel_parser(excel_file='薪资奖金记录.xlsx', engine=engine)
+    salary_excel_parser(excel_file='薪酬福利记录.xlsx', engine=engine)
 
 
 if __name__ == '__main__':
     hd = 'HomeLab Dashboard'
-    print(f'[{hd}] 执行 个人薪资单 同步脚本')
+    print(f'[{hd}] 执行 薪酬福利 同步脚本')
     print(f'[{hd}] 当前运行路径: {os.getcwd()}')
     app()
     print('\nDone!')
