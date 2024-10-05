@@ -148,8 +148,7 @@ def app():
     # 解析从命令行输入的参数
     args = args_parser()
     # 创建数据库引擎
-    engine = create_engine(f'mysql+pymysql://{args.username}:{args.password}@{args.host}:{args.port}/{args.database}',
-                           encoding='utf-8')
+    engine = create_engine(f'mysql+pymysql://{args.username}:{args.password}@{args.host}:{args.port}/{args.database}')
     # 过滤对账单文件
     csv_files = csv_filter(path=args.path)
     for csv_type, csv_file in csv_files:

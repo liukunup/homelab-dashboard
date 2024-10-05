@@ -68,8 +68,7 @@ def app():
     # 解析从命令行输入的参数
     args = args_parser()
     # 创建数据库引擎
-    engine = create_engine(f'mysql+pymysql://{args.username}:{args.password}@{args.host}:{args.port}/{args.database}',
-                           encoding='utf-8')
+    engine = create_engine(f'mysql+pymysql://{args.username}:{args.password}@{args.host}:{args.port}/{args.database}')
     # 过滤对账单文件
     salary_excel_parser(excel_file='薪酬福利记录.xlsx', engine=engine)
 

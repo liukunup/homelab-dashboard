@@ -22,7 +22,7 @@ CREATE TABLE `transaction` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
   `timestamp` datetime NOT NULL COMMENT '交易时间',
   `category` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '交易类型',
-  `counterparty` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '交易对方',
+  `counterparty` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '交易对方',
   `account` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '对方账号',
   `goods` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '商品',
   `income_or_expenditure` enum('收入','支出','不计收支','/') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收/支',
