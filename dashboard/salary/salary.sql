@@ -25,8 +25,8 @@ CREATE TABLE `salary` (
   `amount` double NOT NULL COMMENT '金额',
   `category` enum('工资','奖金','补贴','其他') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '类别',
   `comments` varchar(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='薪酬福利';
 
@@ -36,4 +36,4 @@ CREATE TABLE `salary` (
 -- 发薪时间+发薪公司 确保记录唯一
 --
 
-ALTER TABLE `salary` ADD UNIQUE(`dtm`, `company`);
+ALTER TABLE `salary` ADD UNIQUE(`dtm`, `company`, `amount`);

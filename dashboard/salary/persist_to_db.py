@@ -39,7 +39,8 @@ def insert_on_conflict_update(pd_table, conn, keys, data_iter):
         insert(pd_table.table)
         .values(data)
     )
-    stmt = stmt.on_duplicate_key_update(amount=stmt.inserted.amount, category=stmt.inserted.category,
+    stmt = stmt.on_duplicate_key_update(dtm=stmt.inserted.dtm, company=stmt.inserted.company,
+                                        amount=stmt.inserted.amount, category=stmt.inserted.category,
                                         comments=stmt.inserted.comments)
     result = conn.execute(stmt)
     return result.rowcount
@@ -78,4 +79,4 @@ if __name__ == '__main__':
     print(f'[{hd}] 执行 薪酬福利 同步脚本')
     print(f'[{hd}] 当前运行路径: {os.getcwd()}')
     app()
-    print('\nDone!')
+    print('Done')
