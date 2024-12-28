@@ -27,7 +27,7 @@ def args_parser():
 
 def insert_on_conflict_update(pd_table, conn, keys, data_iter):
     """
-    当插入冲突时更新值(使用`dtm`+`company`交易订单号来确保记录唯一)
+    当插入冲突时更新值(使用`dtm`+`company`+`amount`交易订单号来确保记录唯一)
     :param pd_table: 数据表
     :param conn: 数据库连接
     :param keys: 键名列表
@@ -41,7 +41,7 @@ def insert_on_conflict_update(pd_table, conn, keys, data_iter):
     )
     stmt = stmt.on_duplicate_key_update(dtm=stmt.inserted.dtm, company=stmt.inserted.company,
                                         amount=stmt.inserted.amount, category=stmt.inserted.category,
-                                        comments=stmt.inserted.comments)
+                                        comments=stmt.inserted.comments, update_time=stmt.inserted.update_time)
     result = conn.execute(stmt)
     return result.rowcount
 
@@ -57,6 +57,8 @@ def salary_excel_parser(excel_file, engine=None):
     df = pd.read_excel(excel_file, sheet_name="Sheet1")
     # 覆盖列名
     df.columns = ['dtm', 'company', 'amount', 'category', 'comments']
+    # 添加更新时间
+    df['update_time'] = pd.Timestamp.now()
     # 同步数据
     print(f'当前同步文件: {excel_file}')
     with engine.begin() as connection:
