@@ -69,7 +69,7 @@ def insert_on_conflict_update(pd_table, conn, keys, data_iter):
                                         income_or_expenditure=stmt.inserted.income_or_expenditure,
                                         amount=stmt.inserted.amount, channel=stmt.inserted.channel,
                                         status=stmt.inserted.status, po_seller=stmt.inserted.po_seller,
-                                        comments=stmt.inserted.comments)
+                                        comments=stmt.inserted.comments, update_time=stmt.inserted.update_time)
     result = conn.execute(stmt)
     return result.rowcount
 
@@ -98,6 +98,8 @@ def alipay_csv_synchronizer(csv_file, code=1, engine=None):
     # 去除多余制表符
     df['po_transaction'] = df['po_transaction'].apply(lambda s: s.replace('\t', ''))
     df['po_seller'] = df['po_seller'].apply(lambda s: s.replace('\t', ''))
+    # 添加更新时间
+    df['update_time'] = pd.Timestamp.now()
 
     # 同步数据
     print(f'当前同步文件: {csv_file}')
@@ -127,6 +129,8 @@ def wechatpay_csv_parser(csv_file, code=2, engine=None):
     # 去除多余制表符
     df['po_transaction'] = df['po_transaction'].apply(lambda s: s.replace('\t', ''))
     df['po_seller'] = df['po_seller'].apply(lambda s: s.replace('\t', ''))
+    # 添加更新时间
+    df['update_time'] = pd.Timestamp.now()
 
     # 同步数据
     print(f'当前同步文件: {csv_file}')
