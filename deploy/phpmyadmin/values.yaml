@@ -3,7 +3,7 @@ db:
   # 主机
   host: mysql.homelab-dashboard.svc.cluster.local
 
-# 使能Ingress并设置 `phpmyadmin.homelab.com` 作为访问域名
+# 使能Ingress并设置 `phpmyadmin.homelab.lan` 作为访问域名
 ingress:
   enabled: true
-  hostname: phpmyadmin.homelab.com
+  hostname: phpmyadmin.homelab.lan

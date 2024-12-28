@@ -1,10 +1,10 @@
 # Grafana + MySQL + phpMyAdmin
 
-[Grafana](https://grafana.com/docs/grafana/latest/)
+- [Grafana](https://grafana.com/docs/grafana/latest/)
 
-[MySQL](https://artifacthub.io/packages/helm/bitnami/mysql)
+- [MySQL](https://artifacthub.io/packages/helm/bitnami/mysql)
 
-[phpMyAdmin](https://artifacthub.io/packages/helm/bitnami/phpmyadmin)
+- [phpMyAdmin](https://artifacthub.io/packages/helm/bitnami/phpmyadmin)
 
 如果使用`Docker Desktop`，需要安装`Ingress`，可以参考[Mac - Docker Desktop & Kubernetes.md](Mac+Docker-Desktop+Kubernetes.md)
 
@@ -14,9 +14,9 @@
 
 ```shell
 # 创建命名空间
-kubectl create namespace homelab
+kubectl create namespace homelab-dashboard
 # 导出环境变量
-export K8S_NS=homelab
+export K8S_NS=homelab-dashboard
 ```
 
 2. 安装
@@ -63,14 +63,14 @@ kubectl get all -n $K8S_NS
   - 配置到路由`hosts`文件
 
 ```text
-192.168.100.x phpmyadmin.homelab.com
-192.168.100.x dashboard.homelab.com
+192.168.100.x phpmyadmin.homelab.lan
+192.168.100.x dashboard.homelab.lan
 ```
 
 敬请体验
 
-- [phpmyadmin.homelab.com](http://phpmyadmin.homelab.com/)
-- [dashboard.homelab.com](http://dashboard.homelab.com/)
+- [phpmyadmin.homelab.lan](http://phpmyadmin.homelab.lan/)
+- [dashboard.homelab.lan](http://dashboard.homelab.lan/)
 
 ## 如何连接到数据库?
 
@@ -78,7 +78,7 @@ kubectl get all -n $K8S_NS
 
 ```shell
 # 导出环境变量
-export K8S_NS=homelab
+export K8S_NS=homelab-dashboard
 # 代理到本地
 kubectl port-forward -n $K8S_NS service/mysql-primary 3306:3306
 ```

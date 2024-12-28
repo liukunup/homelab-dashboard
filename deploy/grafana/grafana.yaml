@@ -87,7 +87,7 @@ metadata:
   name: grafana
 spec:
   rules:
-  - host: dashboard.homelab.com
+  - host: dashboard.homelab.lan
     http:
       paths:
       - pathType: Prefix
