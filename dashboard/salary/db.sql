@@ -33,7 +33,7 @@ CREATE TABLE `salary` (
 -- --------------------------------------------------------
 
 --
--- 发薪时间+发薪公司 确保记录唯一
+-- 发薪时间+发薪公司+金额 确保记录唯一
 --
 
 ALTER TABLE `salary` ADD UNIQUE(`dtm`, `company`, `amount`);
