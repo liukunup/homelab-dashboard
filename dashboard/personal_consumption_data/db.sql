@@ -47,7 +47,7 @@ CREATE TABLE `transaction` (
 CREATE TABLE `transaction_tag` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
   `field` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字段名',
-  `value` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字段值',
+  `value` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字段值',
   `counts` int(11) unsigned NOT NULL COMMENT '出现频次',
   `tag` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '暂未标记' COMMENT '字段值',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -62,3 +62,4 @@ CREATE TABLE `transaction_tag` (
 --
 
 ALTER TABLE `transaction` ADD UNIQUE(`po_transaction`);
+ALTER TABLE `transaction_tag` ADD UNIQUE(`field`, `value`);
