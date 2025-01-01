@@ -1,0 +1,125 @@
+# -*- coding: UTF-8 -*-
+# author:      Liu Kun
+# email:       liukunup@outlook.com
+# timestamp:   2025/01/01 17:49:00
+# description: 数据分析器
+
+import os
+import typing
+import argparse
+from sqlalchemy import create_engine, text
+from urllib.parse import quote_plus
+
+
+class AbstractAnalyzer:
+    """ 分析器的抽象类 """
+
+    # 数据库
+    __host = 'localhost'
+    __port = 3306
+    __username = None
+    __password = None
+    __database = 'dashboard'
+
+    def __init__(self, host, port, username, password, database: typing.Text = 'dashboard'):
+        """ 初始化 """
+        # 获取数据库连接参数
+        self.__host = host or os.getenv('DB_HOST', 'localhost')
+        self.__port = port or int(os.getenv('DB_PORT', 3306))
+        self.__username = username or os.getenv('DB_USERNAME')
+        self.__password = password or os.getenv('DB_PASSWORD')
+        self.__database = database or os.getenv('DB_DATABASE', 'dashboard')
+        # 创建数据库连接
+        quoted_password = quote_plus(self.__password)
+        self._engine = create_engine(f'mysql+pymysql://{self.__username}:{quoted_password}@{self.__host}:{self.__port}/{self.__database}')
+
+    def analyze(self, **kwargs):
+        """ 执行分析 """
+        raise NotImplementedError('请在子类中实现该方法')
+
+
+class FrequencyAnalyzer(AbstractAnalyzer):
+    """ 频次分析器 """
+
+    def analyze(self, **kwargs):
+        """
+        逐字段统计`transaction`表里字段值的出现次数,并将统计结果重新插入或更新到`transaction_tag`表中
+        :return: None
+        """
+        # 打印`kwargs`参数
+        print(f'辅助参数: {kwargs}')
+
+        # 待统计字段
+        fields = ['category', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'channel', 'status', 'comments']
+
+        # 创建数据库连接
+        with self._engine.begin() as connection:
+
+            print('-' * 100)
+            for field in fields:
+
+                # 统计字段值出现次数
+                print(f'统计字段: {field}')
+                query = text(f'SELECT {field}, COUNT(*) AS counts FROM dashboard.transaction GROUP BY {field} ORDER BY counts DESC')
+                results = connection.execute(query)
+
+                # 重新插入或更新到`transaction_tag`表中
+                for row in results:
+                    stmt = text('''INSERT INTO transaction_tag (field, value, counts) VALUES (:field, :value, :counts)
+                                   ON DUPLICATE KEY UPDATE counts = :counts_need_update, update_time = NOW()''')
+                    value, counts = row[0], row[1]
+                    # 如果字段值为空,则跳过
+                    if not value:
+                        continue
+                    connection.execute(stmt, {
+                        'field': field,
+                        'value': value,
+                        'counts': counts,
+                        'counts_need_update': counts
+                    })
+
+        # 打印分割线
+        print('-' * 100)
+
+
+def args_parser():
+    """
+    命令行参数解析
+    :return: 从命令行输入的参数
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', type=str, default='localhost')
+    parser.add_argument('--port', type=int, default=3306)
+    parser.add_argument('--username', type=str, default='dashboard')
+    parser.add_argument('--password', type=str)
+    parser.add_argument('--database', type=str, default='dashboard')
+    parser.add_argument('--type', type=str)
+    return parser.parse_args()
+
+
+def app():
+    """ 应用程序 """
+    print('-' * 100)
+    name = 'HomeLab Dashboard - Analyzer'
+    print(f'[{name}] Usage: python analyzer.py '
+           '--host localhost --port 3306 --username <username> --password <password> --database dashboard '
+           '--type <name>')
+    print(f'[{name}] 当前运行路径: {os.getcwd()}')
+    print(f'[{name}] 开始执行脚本...')
+    print('-' * 100)
+    # 从命令行获取参数
+    args = args_parser()
+    # 按要求执行分析
+    operator = {
+        'Frequency': {
+            'class': FrequencyAnalyzer,
+        },
+    }[args.type]
+    analyzer = operator['class'](host=args.host, port=args.port, username=args.username, password=args.password, database=args.database)
+    analyzer.analyze(**operator.get('kwargs', {}))
+    print(f'[{name}] 执行完成!')
+
+
+if __name__ == '__main__':
+    # 应用程序入口
+    app()
