@@ -9,13 +9,14 @@ import typing
 import argparse
 from sqlalchemy import create_engine, text
 from urllib.parse import quote_plus
+from dotenv import load_dotenv
 
 
 class AbstractAnalyzer:
     """ 分析器的抽象类 """
 
     # 数据库
-    __host = 'localhost'
+    __host = None
     __port = 3306
     __username = None
     __password = None
@@ -23,15 +24,18 @@ class AbstractAnalyzer:
 
     def __init__(self, host, port, username, password, database: typing.Text = 'dashboard'):
         """ 初始化 """
+        # 从`.env`文件中加载环境变量
+        load_dotenv()
         # 获取数据库连接参数
-        self.__host = host or os.getenv('DB_HOST', 'localhost')
-        self.__port = port or int(os.getenv('DB_PORT', 3306))
-        self.__username = username or os.getenv('DB_USERNAME')
-        self.__password = password or os.getenv('DB_PASSWORD')
-        self.__database = database or os.getenv('DB_DATABASE', 'dashboard')
+        self.__host = host or os.environ.get('DB_HOST', 'localhost')
+        self.__port = port or int(os.environ.get('DB_PORT', 3306))
+        self.__username = username or os.environ.get('DB_USERNAME')
+        self.__password = password or os.environ.get('DB_PASSWORD')
+        self.__database = database or os.environ.get('DB_DATABASE', 'dashboard')
         # 创建数据库连接
         quoted_password = quote_plus(self.__password)
-        self._engine = create_engine(f'mysql+pymysql://{self.__username}:{quoted_password}@{self.__host}:{self.__port}/{self.__database}')
+        self._engine = create_engine(f'mysql+pymysql://{self.__username}:{quoted_password}@{self.__host}:{self.__port}/{self.__database}?charset=utf8mb4',
+                                     connect_args={'init_command': 'SET time_zone="+08:00"'})
 
     def analyze(self, **kwargs):
         """ 执行分析 """
@@ -88,12 +92,12 @@ def args_parser():
     :return: 从命令行输入的参数
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--host', type=str, default='localhost')
+    parser.add_argument('--host', type=str)
     parser.add_argument('--port', type=int, default=3306)
-    parser.add_argument('--username', type=str, default='dashboard')
+    parser.add_argument('--username', type=str)
     parser.add_argument('--password', type=str)
     parser.add_argument('--database', type=str, default='dashboard')
-    parser.add_argument('--type', type=str)
+    parser.add_argument('--type', type=str, default='Frequency', choices=['Frequency'])
     return parser.parse_args()
 
 
@@ -112,9 +116,12 @@ def app():
     # 按要求执行分析
     operator = {
         'Frequency': {
+            'name': '频次分析器',
             'class': FrequencyAnalyzer,
         },
     }[args.type]
+    print(f'[{name}] 当前分析器: {operator["name"]}')
+    print('-' * 100)
     analyzer = operator['class'](host=args.host, port=args.port, username=args.username, password=args.password, database=args.database)
     analyzer.analyze(**operator.get('kwargs', {}))
     print(f'[{name}] 执行完成!')
