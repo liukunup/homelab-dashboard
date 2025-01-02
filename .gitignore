@@ -10,3 +10,5 @@
 # Business
 **/*.csv
 **/*.xlsx
+
+**/.env
