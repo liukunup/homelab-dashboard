@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "执行数据上传",
+            "name": "Run Python Script",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
