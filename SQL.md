@@ -404,6 +404,22 @@ ORDER BY
 
 #### 新房装修
 
+```sql
+SELECT
+  t.timestamp AS '交易时间',
+  t.category AS '订单分类',
+  t.counterparty AS '商户名称',
+  t.amount AS '支付金额'
+FROM
+  dashboard.transaction t
+  JOIN dashboard.transaction_tag tt ON t.counterparty = tt.value
+WHERE
+  tt.tag = '装修'
+  AND t.timestamp BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())
+ORDER BY
+  t.timestamp DESC
+```
+
 #### 房贷还款
 
 每月还款的本金、利息等情况
