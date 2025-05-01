@@ -1,0 +1,6 @@
+pandas
+openpyxl
+pymysql
+SQLAlchemy
+cryptography
+python-dotenv

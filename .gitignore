@@ -1,0 +1,18 @@
+# PyCharm
+.idea
+
+# Conda
+.conda
+
+# Mac
+**/.DS_Store
+
+# Business
+**/*.csv
+**/*.xlsx
+
+# 环境变量
+**/.env
+
+# 无论如何, 不建议提交预标记文件
+**/*_tag.json

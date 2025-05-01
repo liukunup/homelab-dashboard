@@ -1,0 +1,777 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 2,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "ce83ee8qv2by8d"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "red",
+              "mode": "fixed"
+            },
+            "fieldMinMax": false,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 9,
+          "x": 0,
+          "y": 0
+        },
+        "id": 3,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.4.0",
+        "targets": [
+          {
+            "dataset": "dashboard",
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  amount\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            }
+          }
+        ],
+        "title": "税后总收入",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "ce83ee8qv2by8d"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "red",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "__systemRef": "hideSeriesFrom",
+              "matcher": {
+                "id": "byNames",
+                "options": {
+                  "mode": "exclude",
+                  "names": [
+                    "工资"
+                  ],
+                  "prefix": "All except:",
+                  "readOnly": true
+                }
+              },
+              "properties": [
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 15,
+          "x": 9,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "11.4.0",
+        "targets": [
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '工资'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '工资'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "工资"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '工资'"
+            },
+            "table": "salary"
+          }
+        ],
+        "title": "月收入",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "ce83ee8qv2by8d"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineWidth": 1,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "fieldMinMax": false,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 9
+        },
+        "id": 2,
+        "options": {
+          "barRadius": 0,
+          "barWidth": 0.97,
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "stacking": "normal",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 0
+        },
+        "pluginVersion": "11.4.0",
+        "targets": [
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '年终奖'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '年终奖'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "年终奖"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '年终奖'"
+            },
+            "table": "salary"
+          },
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "hide": false,
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '裁员赔偿'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '裁员赔偿'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "B",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "裁员赔偿"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '裁员赔偿'"
+            },
+            "table": "salary"
+          },
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "hide": false,
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '补贴'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '补贴'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "C",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "补贴"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '补贴'"
+            },
+            "table": "salary"
+          },
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "hide": false,
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '奖金'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '奖金'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "D",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "奖金"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '奖金'"
+            },
+            "table": "salary"
+          },
+          {
+            "dataset": "dashboard",
+            "datasource": {
+              "type": "mysql",
+              "uid": "ce83ee8qv2by8d"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "hide": false,
+            "rawQuery": true,
+            "rawSql": "SELECT\r\n  dtm,\r\n  amount AS '其他'\r\nFROM\r\n  dashboard.salary\r\nWHERE\r\n  category = '其他'\r\n  AND dtm BETWEEN FROM_UNIXTIME($__unixEpochFrom()) AND FROM_UNIXTIME($__unixEpochTo())\r\nORDER BY\r\n  dtm ASC",
+            "refId": "E",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "dtm",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [],
+              "limit": 50,
+              "orderBy": {
+                "property": {
+                  "name": [
+                    "dtm"
+                  ],
+                  "type": "string"
+                },
+                "type": "property"
+              },
+              "orderByDirection": "DESC",
+              "whereJsonTree": {
+                "children1": [
+                  {
+                    "id": "9a89a8aa-89ab-4cde-b012-3194038cb552",
+                    "properties": {
+                      "field": "category",
+                      "fieldSrc": "field",
+                      "operator": "equal",
+                      "value": [
+                        "其他"
+                      ],
+                      "valueError": [
+                        null
+                      ],
+                      "valueSrc": [
+                        "value"
+                      ],
+                      "valueType": [
+                        "text"
+                      ]
+                    },
+                    "type": "rule"
+                  }
+                ],
+                "id": "889a99a8-0123-4456-b89a-b1940382e210",
+                "type": "group"
+              },
+              "whereString": "category = '其他'"
+            },
+            "table": "salary"
+          }
+        ],
+        "title": "其他收入",
+        "type": "barchart"
+      }
+    ],
+    "preload": false,
+    "schemaVersion": 40,
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-1y",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "我的收入情况",
+    "uid": "ae83ezonyyc5cc",
+    "version": 31,
+    "weekStart": ""
+  }
