@@ -124,6 +124,8 @@ class PaySynchronizer(AbstractSynchronizer):
                     csv_files.append(['WeChatPay', filename])
                 if re.match(r'alipay_record_\d{8}_\d{6}.csv', file):
                     csv_files.append(['Alipay', filename])
+                if re.match(r'支付宝交易明细\(\d{8}-\d{8}\).csv', file):
+                    csv_files.append(['Alipay', filename])
         return csv_files
 
     def update(self, from_datasource, to_table, **kwargs):
