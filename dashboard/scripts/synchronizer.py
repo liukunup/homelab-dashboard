@@ -106,7 +106,7 @@ class PaySynchronizer(AbstractSynchronizer):
         return result.rowcount
 
     @staticmethod
-    def csv_filter(path: typing.Text = '.'):
+    def pay_filter(path: typing.Text = '.'):
         """
         对账单文件过滤器
         目标是 找到存放目录中符合要求的对账单文件
@@ -115,18 +115,20 @@ class PaySynchronizer(AbstractSynchronizer):
         """
         if not os.path.exists(path) or not os.access(path, os.R_OK):
             raise RuntimeError(f'The path {path} is invalid.')
-        csv_files = list()
+        pay_files = list()
         for root, _, files in os.walk(path):
             if root != path: break
             for file in files:
                 filename = os.path.join(root, file)
                 if re.match(r'微信支付账单\(\d{8}-\d{8}\).csv', file):
-                    csv_files.append(['WeChatPay', filename])
+                    pay_files.append(['WeChatPay', filename])
+                if re.match(r'微信支付账单流水文件\(\d{8}-\d{8}\)_\d{14}.xlsx', file):
+                    pay_files.append(['WeChatPay', filename])
                 if re.match(r'alipay_record_\d{8}_\d{6}.csv', file):
-                    csv_files.append(['Alipay', filename])
+                    pay_files.append(['Alipay', filename])
                 if re.match(r'支付宝交易明细\(\d{8}-\d{8}\).csv', file):
-                    csv_files.append(['Alipay', filename])
-        return csv_files
+                    pay_files.append(['Alipay', filename])
+        return pay_files
 
     def update(self, from_datasource, to_table, **kwargs):
         """
@@ -137,10 +139,10 @@ class PaySynchronizer(AbstractSynchronizer):
         :return: 影响行数
         """
         # 过滤得到对账单文件列表
-        csv_files = self.csv_filter(path=from_datasource)
+        pay_files = self.pay_filter(path=from_datasource)
         rowcount = 0
-        for _, csv_file in csv_files:
-            rowcount += super().update(csv_file, to_table, **kwargs)
+        for _, pay_file in pay_files:
+            rowcount += super().update(pay_file, to_table, **kwargs)
         print(f'总影响行数: {rowcount}')
         print('-' * 100)
         return rowcount
@@ -181,8 +183,13 @@ class WeChatPaySynchronizer(PaySynchronizer):
 
     def preprocess(self, datasource, **kwargs):
 
-        # 文件读取(编码格式:UTF-8; 跳过行数:17)
-        df = pd.read_csv(datasource, sep=',', encoding='utf-8', skiprows=lambda x: x < 16)
+        # 兼容csv和xlsx格式文件读取(跳过行数:17)
+        if datasource.lower().endswith('.csv'):
+            df = pd.read_csv(datasource, sep=',', encoding='utf-8', skiprows=lambda x: x < 16)
+        elif datasource.lower().endswith('.xlsx'):
+            df = pd.read_excel(datasource, skiprows=16)
+        else:
+            raise ValueError(f'Unsupported file format: {datasource}')
 
         # 覆盖列名
         df.columns = ['timestamp', 'category', 'counterparty', 'goods', 'income_or_expenditure',
@@ -197,7 +204,7 @@ class WeChatPaySynchronizer(PaySynchronizer):
 
         # 去除多余制表符
         df['po_transaction'] = df['po_transaction'].apply(lambda s: s.replace('\t', ''))
-        df['po_seller'] = df['po_seller'].apply(lambda s: s.replace('\t', ''))
+        df['po_seller'] = df['po_seller'].fillna('').astype(str).str.replace('\t', '')
 
         return df
 
