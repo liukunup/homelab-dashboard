@@ -122,7 +122,7 @@ class PaySynchronizer(AbstractSynchronizer):
                 filename = os.path.join(root, file)
                 if re.match(r'微信支付账单\(\d{8}-\d{8}\).csv', file):
                     pay_files.append(['WeChatPay', filename])
-                if re.match(r'微信支付账单流水文件\(\d{8}-\d{8}\)_\d{14}.xlsx', file):
+                if re.match(r'微信支付账单流水文件\(\d{8}-\d{8}\).xlsx', file):
                     pay_files.append(['WeChatPay', filename])
                 if re.match(r'alipay_record_\d{8}_\d{6}.csv', file):
                     pay_files.append(['Alipay', filename])
