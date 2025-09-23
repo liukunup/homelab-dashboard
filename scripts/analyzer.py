@@ -8,6 +8,7 @@ import os
 import json
 import typing
 import argparse
+
 from sqlalchemy import create_engine, text
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
@@ -55,31 +56,31 @@ class FrequencyAnalyzer(AbstractAnalyzer):
         print(f'辅助参数: {kwargs}')
 
         # 待统计字段
-        fields = ['category', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'channel', 'status', 'comments']
+        keys = ['transaction_type', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'channel', 'status', 'comments']
 
         # 创建数据库连接
         with self._engine.begin() as connection:
 
             print('-' * 100)
-            for field in fields:
+            for key in keys:
 
                 # 统计字段值出现次数
-                print(f'统计字段: {field}')
-                query = text(f'SELECT {field}, COUNT(*) AS counts FROM dashboard.transaction GROUP BY {field} ORDER BY counts DESC')
+                print(f'统计字段: {key}')
+                query = text(f'SELECT {key}, COUNT(*) AS counts FROM dashboard.deb_online_transaction GROUP BY {key} ORDER BY counts DESC')
                 results = connection.execute(query)
 
-                # 重新插入或更新到`transaction_tag`表中
+                # 重新插入或更新到`deb_online_transaction_statistics`表中
                 for row in results:
-                    stmt = text('''INSERT INTO transaction_tag (field, value, counts) VALUES (:field, :value, :counts)
-                                   ON DUPLICATE KEY UPDATE counts = :counts_need_update, update_time = NOW()''')
+                    stmt = text('''INSERT INTO deb_online_transaction_statistics (key, value, value_count) VALUES (:key, :value, :value_count)
+                                   ON DUPLICATE KEY UPDATE value_count = :value_count_need_update, update_time = NOW()''')
                     value, counts = row[0], row[1]
                     # 如果字段值为空,则跳过
                     if not value:
                         continue
                     connection.execute(stmt, {
-                        'field': field,
+                        'key': key,
                         'value': value,
-                        'counts': counts,
+                        'value_count': counts,
                         'counts_need_update': counts
                     })
 
@@ -103,7 +104,7 @@ class PreMarkAnalyzer(AbstractAnalyzer):
 
     def import_tags(self, **kwargs):
         """
-        从json文件中导入标签数据到`transaction_tag`表中
+        从json文件中导入标签数据到`deb_online_transaction_statistics`表中
         :return: None
         """
         # 读取json文件

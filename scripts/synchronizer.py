@@ -2,13 +2,14 @@
 # author:      Liu Kun
 # email:       liukunup@outlook.com
 # timestamp:   2025/1/1 18:24:00
-# description: 数据同步器(将各种来源的数据同步到数据库表)
+# description: 数据同步器（将各种来源的数据同步到数据库表）
 
 import re
 import os
 import typing
 import argparse
 import pandas as pd
+
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.mysql import insert
 from urllib.parse import quote_plus
@@ -32,7 +33,7 @@ class AbstractSynchronizer:
         # 获取数据库连接参数
         self.__host = host or os.environ.get('DB_HOST', 'localhost')
         self.__port = port or int(os.environ.get('DB_PORT', 3306))
-        self.__username = username or os.environ.get('DB_USERNAME')
+        self.__username = username or os.environ.get('DB_USERNAME', 'dashboard')
         self.__password = password or os.environ.get('DB_PASSWORD')
         self.__database = database or os.environ.get('DB_DATABASE', 'dashboard')
         # 创建数据库连接
@@ -95,13 +96,13 @@ class PaySynchronizer(AbstractSynchronizer):
             insert(pd_table.table)
             .values(data)
         )
-        stmt = stmt.on_duplicate_key_update(timestamp=stmt.inserted.timestamp, category=stmt.inserted.category,
+        stmt = stmt.on_duplicate_key_update(transaction_at=stmt.inserted.transaction_at, transaction_type=stmt.inserted.transaction_type,
                                             counterparty=stmt.inserted.counterparty, account=stmt.inserted.account,
                                             goods=stmt.inserted.goods,
                                             income_or_expenditure=stmt.inserted.income_or_expenditure,
                                             amount=stmt.inserted.amount, channel=stmt.inserted.channel,
-                                            status=stmt.inserted.status, po_seller=stmt.inserted.po_seller,
-                                            comments=stmt.inserted.comments, update_time=stmt.inserted.update_time)
+                                            status=stmt.inserted.status, trade_no=stmt.inserted.trade_no,
+                                            comments=stmt.inserted.comments, update_at=stmt.inserted.update_at)
         result = conn.execute(stmt)
         return result.rowcount
 
@@ -157,23 +158,23 @@ class AlipaySynchronizer(PaySynchronizer):
         df = pd.read_csv(datasource, sep=',', encoding="gbk", skiprows=lambda x: x < 24)
 
         # 覆盖列名
-        df.columns = ['timestamp', 'category', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'amount',
-                      'channel', 'status', 'po_transaction', 'po_seller', 'comments', 'unknown']
+        df.columns = ['transaction_at', 'transaction_type', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'amount',
+                      'channel', 'status', 'trade_no', 'out_trade_no', 'comments', 'unknown']
 
         # 添加来源
-        df.loc[:, 'source'] = kwargs.get('source', 1)
+        df.loc[:, 'source'] = kwargs.get('source', 'alipay')
 
         # 去除多余列
         df = df.drop(labels='unknown', axis=1)
 
         # 去除行首尾空格
-        for k in ['timestamp', 'category', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'channel', 'status',
-                  'po_transaction', 'po_seller', 'comments']:
+        for k in ['transaction_at', 'transaction_type', 'counterparty', 'account', 'goods', 'income_or_expenditure', 'channel', 'status',
+                  'trade_no', 'out_trade_no', 'comments']:
             df[k] = df[k].apply(lambda s: s if not isinstance(s, str) else s.strip())
 
         # 去除多余制表符
-        df['po_transaction'] = df['po_transaction'].apply(lambda s: s.replace('\t', ''))
-        df['po_seller'] = df['po_seller'].apply(lambda s: s.replace('\t', ''))
+        df['trade_no'] = df['trade_no'].apply(lambda s: s.replace('\t', ''))
+        df['out_trade_no'] = df['out_trade_no'].apply(lambda s: s.replace('\t', ''))
 
         return df
 
@@ -192,19 +193,19 @@ class WeChatPaySynchronizer(PaySynchronizer):
             raise ValueError(f'Unsupported file format: {datasource}')
 
         # 覆盖列名
-        df.columns = ['timestamp', 'category', 'counterparty', 'goods', 'income_or_expenditure',
-                      'amount', 'channel', 'status', 'po_transaction', 'po_seller', 'comments']
+        df.columns = ['transaction_at', 'transaction_type', 'counterparty', 'goods', 'income_or_expenditure',
+                      'amount', 'channel', 'status', 'trade_no', 'out_trade_no', 'comments']
 
         # 添加来源
         df.loc[:, 'account'] = None
-        df.loc[:, 'source'] = kwargs.get('source', 2)
+        df.loc[:, 'source'] = kwargs.get('source', 'wechatpay')
 
         # 处理¥符号以及转格式
         df['amount'] = df['amount'].apply(lambda s: float(s.replace('¥', '')))
 
         # 去除多余制表符
-        df['po_transaction'] = df['po_transaction'].apply(lambda s: s.replace('\t', ''))
-        df['po_seller'] = df['po_seller'].fillna('').astype(str).str.replace('\t', '')
+        df['trade_no'] = df['trade_no'].apply(lambda s: s.replace('\t', ''))
+        df['out_trade_no'] = df['out_trade_no'].fillna('').astype(str).str.replace('\t', '')
 
         return df
 
@@ -302,7 +303,7 @@ def app():
             'datasource': 'alipay',
             'table': 'transaction',
             'kwargs': {
-                'source': 1
+                'source': 'alipay'
             }
         },
         'WeChatPay': {
@@ -311,7 +312,7 @@ def app():
             'datasource': 'wechatpay',
             'table': 'transaction',
             'kwargs': {
-                'source': 2
+                'source': 'wechatpay'
             }
         },
         'Salary': {
