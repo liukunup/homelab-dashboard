@@ -21,7 +21,7 @@ ALTER DATABASE `dashboard`
 CREATE TABLE `deb_account` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
     `account_code` VARCHAR(4) NOT NULL COMMENT '科目编码',
-    `account_name` VARCHAR(256) NOT NULL COMMENT '科目名称',
+    `account_name` VARCHAR(64) NOT NULL COMMENT '科目名称',
     `account_type` ENUM('资产', '负债', '权益', '收入', '费用') NOT NULL COMMENT '科目类型',
     `is_active` BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否启用',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -42,7 +42,7 @@ CREATE TABLE `deb_account` (
 CREATE TABLE `deb_transaction` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
     `transaction_date` DATE NOT NULL COMMENT '交易日期',
-    `description` TEXT NOT NULL COMMENT '摘要',
+    `brief` TEXT NOT NULL COMMENT '摘要',
     `reference` VARCHAR(256) DEFAULT NULL COMMENT '订单号/凭证号/参考号',
     `status` ENUM('draft', 'posted', 'reviewed') NOT NULL DEFAULT 'draft' COMMENT '状态',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -50,6 +50,7 @@ CREATE TABLE `deb_transaction` (
     `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     INDEX idx_transaction_date (`transaction_date`),
+    INDEX idx_reference (`reference`),
     INDEX idx_status (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易主表';
 
@@ -91,7 +92,7 @@ CREATE TABLE `deb_mapping_rule` (
     `pattern` VARCHAR(256) NOT NULL COMMENT '匹配模式',
     `debit_account_id` BIGINT UNSIGNED NOT NULL COMMENT '借方科目ID',
     `credit_account_id` BIGINT UNSIGNED NOT NULL COMMENT '贷方科目ID',
-    `template` VARCHAR(256) DEFAULT '{goods} - {counterpart}' COMMENT '描述模板',
+    `template` VARCHAR(256) DEFAULT '{counterpart} - {goods}' COMMENT '描述模板',
     `priority` INT NOT NULL DEFAULT 0 COMMENT '优先级（数值越大优先级越高）',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -111,23 +112,29 @@ CREATE TABLE `deb_mapping_rule` (
 
 CREATE TABLE `deb_online_transaction` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
-    `timestamp` DATETIME NOT NULL COMMENT '交易时间',
-    `category` VARCHAR(256) NOT NULL COMMENT '交易类型',
+    `transaction_at` DATETIME NOT NULL COMMENT '交易时间',
+    `transaction_type` VARCHAR(256) NOT NULL COMMENT '交易类型',
     `counterparty` VARCHAR(256) DEFAULT NULL COMMENT '交易对方',
     `account` VARCHAR(256) DEFAULT NULL COMMENT '对方账号',
     `goods` VARCHAR(256) NOT NULL COMMENT '商品',
     `income_or_expenditure` ENUM('收入','支出','不计收支','/') NOT NULL COMMENT '收/支',
-    `amount` double NOT NULL COMMENT '金额',
+    `amount` DECIMAL(15,2) NOT NULL COMMENT '金额',
     `channel` VARCHAR(256) DEFAULT NULL COMMENT '收/付款方式',
     `status` VARCHAR(256) NOT NULL COMMENT '交易状态',
-    `po_transaction` VARCHAR(256) NOT NULL COMMENT '交易订单号',
-    `po_seller` VARCHAR(256) NOT NULL COMMENT '商家订单号',
-    `comments` VARCHAR(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-    `source` tinyint(3) UNSIGNED NOT NULL DEFAULT '000' COMMENT '记录来源(0-手工,1-支付宝,2-微信)',
+    `trade_no` VARCHAR(256) NOT NULL COMMENT '交易订单号',
+    `out_trade_no` VARCHAR(256) NOT NULL COMMENT '商家订单号',
+    `comments` VARCHAR(1024) DEFAULT NULL COMMENT '备注',
+    `source` ENUM('manual', 'alipay', 'wechatpay', 'bank') NOT NULL DEFAULT 'manual' COMMENT '来源',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    INDEX idx_transaction_at (`transaction_at`),
+    INDEX idx_source (`source`),
+    INDEX idx_trade_no (`trade_no`),
+    INDEX idx_counterparty (`counterparty`),
+    INDEX idx_income_or_expenditure (`income_or_expenditure`),
+    INDEX idx_transaction_type (`transaction_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='原始交易记录表';
 
 -- --------------------------------------------------------
@@ -140,8 +147,8 @@ CREATE TABLE `deb_online_transaction_statistics` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
     `key` VARCHAR(256) NOT NULL COMMENT '键',
     `value` VARCHAR(256) NOT NULL COMMENT '值',
-    `value_count` BIGINT UNSIGNED NOT NULL COMMENT '值的次数',
-    `category` VARCHAR(256) NOT NULL DEFAULT '暂未标记' COMMENT '值的类别',
+    `value_count` BIGINT UNSIGNED NOT NULL COMMENT '值的出现次数',
+    `tag` VARCHAR(256) NOT NULL DEFAULT '暂未标记' COMMENT '值的类别/标记',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
@@ -149,7 +156,7 @@ CREATE TABLE `deb_online_transaction_statistics` (
     UNIQUE KEY uq_key_value (`key`, `value`),
     INDEX idx_key (`key`),
     INDEX idx_value (`value`),
-    INDEX idx_category (`category`)
+    INDEX idx_tag (`tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='原始交易统计表';
 
 -- --------------------------------------------------------
@@ -158,12 +165,42 @@ CREATE TABLE `deb_online_transaction_statistics` (
 -- 预置数据
 --
 
-INSERT INTO `dek_account` (`account_code`, `account_name`, `account_type`) VALUES
+INSERT INTO `deb_account` (`account_code`, `account_name`, `account_type`) VALUES
+-- 资产类 (1xxx)
 ('1001', '现金', '资产'),
-('1002', '存款', '资产'),
+('1002', '银行存款', '资产'),
+('1003', '支付宝余额', '资产'),
+('1004', '微信零钱', '资产'),
+('1005', '信用卡', '资产'),
+('1010', '应收账款', '资产'),
+('1020', '预付费用', '资产'),
+-- 负债类 (2xxx)
 ('2001', '房贷', '负债'),
 ('2002', '车贷', '负债'),
-('4001', '工资', '收入'),
-('5001', '餐饮', '费用'),
-('5002', '交通', '费用'),
-('5003', '购物', '费用');
+('2010', '应付账款', '负债'),
+('2011', '应付工资', '负债'),
+('2012', '预收收入', '负债'),
+-- 权益类 (3xxx)
+('3001', '实收资本', '权益'),
+('3002', '未分配利润', '权益'),
+-- 收入类 (4xxx)
+('4001', '工资收入', '收入'),
+('4002', '奖金收入', '收入'),
+('4003', '兼职收入', '收入'),
+('4004', '理财收入', '收入'),
+('4005', '投资收益', '收入'),
+-- 费用类 (5xxx)
+('5001', '餐饮美食', '费用'),
+('5002', '交通出行', '费用'),
+('5003', '购物消费', '费用'),
+('5004', '住房水电', '费用'),
+('5005', '通讯网络', '费用'),
+('5006', '娱乐休闲', '费用'),
+('5007', '医疗保健', '费用'),
+('5008', '学习培训', '费用'),
+('5009', '人情往来', '费用'),
+('5010', '服饰美容', '费用'),
+('5011', '宠物花销', '费用'),
+('5012', '汽车费用', '费用'),
+('5013', '保险费用', '费用'),
+('5014', '税费支出', '费用');
