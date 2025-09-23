@@ -1,0 +1,88 @@
+# Dashboard Stack configuration
+
+networks:
+  dashboard-network:
+    name: dashboard-network
+    driver: bridge
+
+volumes:
+  mysql-data:
+  grafana-data:
+
+services:
+
+  mysql:
+    image: docker.io/library/mysql:8
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?"Environment variable MYSQL_ROOT_PASSWORD is required"}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dashboard}
+      MYSQL_USER: ${MYSQL_USERNAME:-dashboard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?"Environment variable MYSQL_PASSWORD is required"}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - dashboard-network
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - database
+      - testing
+      - staging
+
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      LANG: en_US.UTF-8
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USERNAME:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?"Environment variable GRAFANA_ADMIN_PASSWORD is required"}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - dashboard-network
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/robots.txt"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - dashboard
+      - testing
+      - staging
+
+  phpmyadmin:
+    image: docker.io/phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:?"Environment variable MYSQL_ROOT_PASSWORD is required"}
+    ports:
+      - "${PMA_PORT:-8989}:80"
+    networks:
+      - dashboard-network
+    depends_on:
+      - mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - testing

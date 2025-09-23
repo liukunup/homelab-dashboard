@@ -1,27 +1,47 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-  "name": "Dev Container - Python",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
-  },
-  "postCreateCommand": "pip install -r /workspaces/${localWorkspaceFolderBasename}/dashboard/requirements.txt",
-  "remoteUser": "vscode",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.debugpy",
-        "njpwerner.autodocstring"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.terminal.activateEnvironment": false
-      }
-    }
-  },
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+	"name": "Python",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+        		"terminal.integrated.shell.linux": "/bin/bash"
+      		},
+			"extensions": [
+				// Python
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"Cameron.vscode-pytest",
+				// Git
+				"mhutchie.git-graph",
+				"donjayamanne.githistory",
+				// GitHub Copilot
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				// Chinese (Simplified) Language Pack
+				"MS-CEINTL.vscode-language-pack-zh-hans",
+				// Others
+				"esbenp.prettier-vscode",
+				"vscode-icons-team.vscode-icons",
+				"redhat.vscode-yaml",
+				"humao.rest-client"
+			]
+		}
+	},
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/git-lfs:1": {}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "pip3 install --user -r ./dashboard/requirements.txt",
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "vscode",
+	// Uncomment to use the current folder as workspace instead of /workspaces/<folder_name>
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
 }
