@@ -2,9 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
 	"name": "Python",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
+	"image": "mcr.microsoft.com/devcontainers/python:3.12",
 	"customizations": {
 		"vscode": {
 			"settings": {
@@ -33,15 +31,14 @@
 	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {},
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/git-lfs:1": {}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip3 install --user -r requirements.txt",
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "vscode",
-	// Uncomment to use the current folder as workspace instead of /workspaces/<folder_name>
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+	"remoteUser": "root",
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash setup.sh && pip3 install -r requirements.txt"
 }
