@@ -89,6 +89,7 @@ CREATE TABLE `deb_transaction_entry` (
 CREATE TABLE `deb_mapping_rule` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
     `platform` ENUM('manual', 'alipay', 'wechatpay', 'bank', 'all') NOT NULL COMMENT '适用平台',
+    `scope` ENUM('counterparty', 'goods') NOT NULL COMMENT '匹配范围',
     `pattern` VARCHAR(256) NOT NULL COMMENT '匹配模式',
     `debit_account_id` BIGINT UNSIGNED NOT NULL COMMENT '借方科目ID',
     `credit_account_id` BIGINT UNSIGNED NOT NULL COMMENT '贷方科目ID',
