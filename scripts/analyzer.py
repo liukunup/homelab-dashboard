@@ -178,7 +178,7 @@ def args_parser():
     parser.add_argument('--username', type=str)
     parser.add_argument('--password', type=str)
     parser.add_argument('--database', type=str, default='dashboard')
-    parser.add_argument('--type', type=str, default='Frequency', choices=['Frequency', 'PreMark'])
+    parser.add_argument('--type', type=str, default='Frequency', choices=['Frequency', 'PreMark1', 'PreMark2'])
     return parser.parse_args()
 
 
@@ -200,14 +200,14 @@ def app():
             'name': '频次分析器',
             'class': FrequencyAnalyzer,
         },
-        'PreMarkImport': {
+        'PreMark1': {
             'name': '预标记分析器',
             'class': PreMarkAnalyzer,
             'kwargs': {
                 'op': 'import',
             }
         },
-        'PreMarkExport': {
+        'PreMark2': {
             'name': '预标记分析器',
             'class': PreMarkAnalyzer,
             'kwargs': {

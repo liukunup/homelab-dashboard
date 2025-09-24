@@ -5,11 +5,85 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Python Script",
+            "name": "Alipay",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "program": "${workspaceFolder}/scripts/synchronizer.py",
+            "args": [
+                "--path", "data",
+                "--type", "Alipay"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "WeChatPay",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/synchronizer.py",
+            "args": [
+                "--path", "data",
+                "--type", "WeChatPay"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Salary",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/synchronizer.py",
+            "args": [
+                "--path", "data",
+                "--type", "Salary"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "HousingLoan",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/synchronizer.py",
+            "args": [
+                "--path", "data",
+                "--type", "HousingLoan"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Frequency",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/analyzer.py",
+            "args": [
+                "--type", "Frequency"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Import Tags",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/analyzer.py",
+            "args": [
+                "--type", "PreMark1"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Export Tags",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/analyzer.py",
+            "args": [
+                "--type", "PreMark2"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
