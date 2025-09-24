@@ -218,7 +218,12 @@ class SalarySynchronizer(AbstractSynchronizer):
     def preprocess(self, file, **kwargs):
 
         # 文件读取
-        df = pd.read_excel(file, sheet_name=kwargs.get('sheetName', 'Sheet1'))
+        if file.lower().endswith('.xlsx'):
+            df = pd.read_excel(file, sheet_name=kwargs.get('sheetName', 'Sheet1'))
+        elif file.lower().endswith('.csv'):
+            df = pd.read_csv(file, sep=',', encoding='utf-8')
+        else:
+            raise ValueError(f'Unsupported file format: {file}')
 
         # 覆盖列名
         df.columns = ['dtm', 'company', 'amount', 'category', 'comments']
@@ -244,7 +249,12 @@ class HousingLoanSynchronizer(AbstractSynchronizer):
     def preprocess(self, file, **kwargs):
 
         # 文件读取
-        df = pd.read_excel(file, sheet_name=kwargs.get('sheetName', 'Sheet1'))
+        if file.lower().endswith('.xlsx'):
+            df = pd.read_excel(file, sheet_name=kwargs.get('sheetName', 'Sheet1'))
+        elif file.lower().endswith('.csv'):
+            df = pd.read_csv(file, sep=',', encoding='utf-8')
+        else:
+            raise ValueError(f'Unsupported file format: {file}')
 
         # 覆盖列名
         df.columns = ['period', 'organization', 'current_interest_rate', 'lpr_spread',
@@ -320,13 +330,13 @@ def app():
         'Salary': {
             'name': '收入明细',
             'class': SalarySynchronizer,
-            'datasource': '收入明细.xlsx',
+            'datasource': '收入明细.csv',
             'table': 'salary',
         },
         'HousingLoan': {
             'name': '房屋贷款',
             'class': HousingLoanSynchronizer,
-            'datasource': '已还款明细.xlsx',
+            'datasource': '已还款明细.csv',
             'table': 'loan',
         },
     }[args.type]
