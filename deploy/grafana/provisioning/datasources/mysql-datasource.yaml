@@ -1,0 +1,19 @@
+# 文件: mysql-datasource.yaml
+apiVersion: 1
+
+datasources:
+  - name: MySQL-Prod
+    type: mysql
+    access: proxy
+    url: mysql-host:3306          # MySQL 服务地址（容器内可解析的 hostname）
+    database: your_database_name  # 默认数据库（可选）
+    user: grafana_reader          # 用于连接 MySQL 的用户名
+    secureJsonData:
+      password: ${MYSQL_PASSWORD}  # 建议使用环境变量或 secrets 管理
+    jsonData:
+      tlsAuth: false
+      tlsSkipVerify: true         # 跳过 TLS 证书验证（测试环境可用，生产慎用）
+      # maxOpenConns: 0           # 可选：最大打开连接数（0 = 无限制）
+      # maxIdleConns: 2           # 可选：最大空闲连接数
+      # connMaxLifetime: 14400    # 可选：连接最大生命周期（秒）
+    isDefault: false              # 是否设为默认数据源
