@@ -108,21 +108,21 @@ class PreMarkAnalyzer(AbstractAnalyzer):
         :return: None
         """
         # 读取json文件
-        with open('transaction_tag.json', 'r', encoding='utf-8') as file:
+        with open('预置标签.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
             # 创建数据库连接
             with self._engine.begin() as connection:
                 # 遍历json数据
-                for field, tags in data.items():
+                for key, tags in data.items():
                     for tag, values in tags.items():
                         if tag == '暂未标记':
                             continue
-                        print(f'字段: {field}, 标签: {tag}, 值的数量: {len(values)}')
+                        print(f'字段: {key}, 标签: {tag}, 值的数量: {len(values)}')
                         for value in values:
-                            stmt = text('''INSERT INTO transaction_tag (field, value, counts, tag) VALUES (:field, :value, 0, :tag)
+                            stmt = text('''INSERT INTO transaction_tag (key, value, value_count, tag) VALUES (:key, :value, 0, :tag)
                                            ON DUPLICATE KEY UPDATE tag = :tag_need_update, update_time = NOW()''')
                             connection.execute(stmt, {
-                                'field': field,
+                                'key': key,
                                 'value': value,
                                 'tag': tag,
                                 'tag_need_update': tag
@@ -132,7 +132,7 @@ class PreMarkAnalyzer(AbstractAnalyzer):
 
     def export_tags(self, **kwargs):
         """
-        从`transaction_tag`表中导入标签数据到json文件中
+        从`deb_online_transaction_statistics`表中导入标签数据到json文件中
         :return: None
         """
         white_list = ['category', 'counterparty', 'goods', 'income_or_expenditure', 'channel']
@@ -140,29 +140,29 @@ class PreMarkAnalyzer(AbstractAnalyzer):
         # 创建数据库连接
         with self._engine.begin() as connection:
             # 查询标签数据
-            query = text('SELECT `field`, `value`, `tag` FROM dashboard.transaction_tag')
+            query = text('SELECT `key`, `value`, `tag` FROM dashboard.deb_online_transaction_statistics')
             results = connection.execute(query)
             # 遍历结果集
             output = {}
             for row in results:
-                field, value, tag = row[0], row[1], row[2]
+                key, value, tag = row[0], row[1], row[2]
                 # 跳过黑名单字段
-                if field in black_list:
+                if key in black_list:
                     continue
                 # 只保留白名单字段
-                if field not in white_list:
+                if key not in white_list:
                     continue
-                if field not in output:
-                    output[field] = {tag: [value]}
+                if key not in output:
+                    output[key] = {tag: [value]}
                 else:
-                    if tag not in output[field]:
-                        output[field][tag] = [value]
+                    if tag not in output[key]:
+                        output[key][tag] = [value]
                     else:
-                        output[field][tag].append(value)
+                        output[key][tag].append(value)
             # 将标签数据写入json文件
-            with open('transaction_tag.json', 'w', encoding='utf-8') as file:
+            with open('在线支付数据分析结果.json', 'w', encoding='utf-8') as file:
                 file.write(json.dumps(output, ensure_ascii=False, indent=4))
-                print(f'标签数据已导出到文件: transaction_tag.json')
+                print(f'标签数据已导出到文件: 在线支付数据分析结果.json')
         # 打印分割线
         print('>' * 100)
 
@@ -200,7 +200,14 @@ def app():
             'name': '频次分析器',
             'class': FrequencyAnalyzer,
         },
-        'PreMark': {
+        'PreMarkImport': {
+            'name': '预标记分析器',
+            'class': PreMarkAnalyzer,
+            'kwargs': {
+                'op': 'import',
+            }
+        },
+        'PreMarkExport': {
             'name': '预标记分析器',
             'class': PreMarkAnalyzer,
             'kwargs': {
