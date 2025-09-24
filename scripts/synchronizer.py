@@ -57,7 +57,7 @@ class AbstractSynchronizer:
             print(f'从数据源 {from_datasource} 未发现有效数据')
             return
         # 添加更新时间
-        df['update_time'] = pd.Timestamp.now()
+        df['update_at'] = pd.Timestamp.now()
         # 更新/同步到数据库
         rowcount = 0
         with self._engine.begin() as connection:
@@ -101,8 +101,10 @@ class PaySynchronizer(AbstractSynchronizer):
                                             goods=stmt.inserted.goods,
                                             income_or_expenditure=stmt.inserted.income_or_expenditure,
                                             amount=stmt.inserted.amount, channel=stmt.inserted.channel,
-                                            status=stmt.inserted.status, trade_no=stmt.inserted.trade_no,
-                                            comments=stmt.inserted.comments, update_at=stmt.inserted.update_at)
+                                            status=stmt.inserted.status,
+                                            trade_no=stmt.inserted.trade_no, out_trade_no=stmt.inserted.out_trade_no,
+                                            comments=stmt.inserted.comments, source=stmt.inserted.source,
+                                            update_at=stmt.inserted.update_at)
         result = conn.execute(stmt)
         return result.rowcount
 
@@ -231,7 +233,7 @@ class SalarySynchronizer(AbstractSynchronizer):
         )
         stmt = stmt.on_duplicate_key_update(dtm=stmt.inserted.dtm, company=stmt.inserted.company,
                                             amount=stmt.inserted.amount, category=stmt.inserted.category,
-                                            comments=stmt.inserted.comments, update_time=stmt.inserted.update_time)
+                                            comments=stmt.inserted.comments, update_at=stmt.inserted.update_at)
         result = conn.execute(stmt)
         return result.rowcount
 
@@ -263,7 +265,7 @@ class HousingLoanSynchronizer(AbstractSynchronizer):
                                             due_principal_interest=stmt.inserted.due_principal_interest,
                                             actual_principal=stmt.inserted.actual_principal, actual_interest=stmt.inserted.actual_interest,
                                             repayment_date=stmt.inserted.repayment_date, actual_interest_payment_date=stmt.inserted.actual_interest_payment_date,
-                                            update_time=stmt.inserted.update_time)
+                                            update_at=stmt.inserted.update_at)
         result = conn.execute(stmt)
         return result.rowcount
 

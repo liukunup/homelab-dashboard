@@ -162,6 +162,54 @@ CREATE TABLE `deb_online_transaction_statistics` (
 -- --------------------------------------------------------
 
 --
+-- 工资薪金表
+--
+
+CREATE TABLE `deb_salary` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
+    `dtm` DATE NOT NULL COMMENT '年/月/日',
+    `company` VARCHAR(256) NOT NULL COMMENT '公司',
+    `amount` DECIMAL(15,2) NOT NULL CHECK (amount > 0) COMMENT '金额',
+    `category` ENUM('工资','年终奖','裁员赔偿','补贴','奖金','其他') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '类别',
+    `comments` VARCHAR(1024) DEFAULT NULL COMMENT '备注',
+    `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY uq_dtm_company_amount (`dtm`, `company`, `amount`),
+    INDEX idx_dtm (`dtm`),
+    INDEX idx_company (`company`),
+    INDEX idx_category (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工资薪金表';
+
+-- --------------------------------------------------------
+
+--
+-- 房贷还款表
+--
+
+CREATE TABLE `deb_loan` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
+    `period` INT NOT NULL COMMENT '第N期',
+    `organization` VARCHAR(256) NOT NULL COMMENT '服务机构名称',
+    `current_interest_rate` DECIMAL(15,2) NOT NULL CHECK (current_interest_rate > 0) COMMENT '当前年利率(%)',
+    `lpr_spread` DECIMAL(15,2) NOT NULL CHECK (lpr_spread > 0) COMMENT '加点幅度(%)',
+    `actual_principal_interest` DECIMAL(15,2) NOT NULL CHECK (actual_principal_interest > 0) COMMENT '实还本息',
+    `due_principal_interest` DECIMAL(15,2) NOT NULL CHECK (due_principal_interest > 0) COMMENT '应还本息',
+    `actual_principal` DECIMAL(15,2) NOT NULL CHECK (actual_principal > 0) COMMENT '实还本金',
+    `actual_interest` DECIMAL(15,2) NOT NULL CHECK (actual_interest > 0) COMMENT '实还利息',
+    `repayment_date` DATE NOT NULL COMMENT '还款日期',
+    `actual_interest_payment_date` DATE NOT NULL COMMENT '实际还息日期',
+    `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY uq_period_organization (`period`, `organization`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='房贷还款表';
+
+-- --------------------------------------------------------
+
+--
 -- 预置数据
 --
 
