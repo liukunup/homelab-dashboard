@@ -1,8 +1,8 @@
-# Dashboard Stack configuration
+# Dashboard Stack
 
 networks:
   dashboard-network:
-    name: dashboard-network
+    name: ${NETWORK_NAME}
     driver: bridge
 
 volumes:
@@ -11,33 +11,62 @@ volumes:
 
 services:
 
+  # MySQL
+  # https://dev.mysql.com/doc/refman/8.4/en/
   mysql:
-    image: docker.io/library/mysql:8
+    image: ${REGISTRY:-docker.io}/${MYSQL_IMAGE:-mysql:latest}
     container_name: mysql
+    hostname: mysql
     restart: unless-stopped
+    ports:
+      - ${MYSQL_PORT:-3306}:3306
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?"Environment variable MYSQL_ROOT_PASSWORD is required"}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?root password is required}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-dashboard}
-      MYSQL_USER: ${MYSQL_USERNAME:-dashboard}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?"Environment variable MYSQL_PASSWORD is required"}
+      MYSQL_USER: ${MYSQL_USER:-dashboard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?password is required}
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - dashboard-network
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
+    profiles:
+      - all
+      - base
+      - database
+      - mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD 2>/dev/null | grep -q alive"]
       interval: 30s
       timeout: 10s
       retries: 3
-    profiles:
-      - database
-      - testing
-      - staging
 
+  phpmyadmin:
+    image: ${REGISTRY:-docker.io}/${PMA_IMAGE:-phpmyadmin/phpmyadmin:latest}
+    container_name: phpmyadmin
+    hostname: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - ${PMA_PORT:-80}:80
+    environment:
+      PMA_ARBITRARY: ${PMA_ARBITRARY:-1}
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    networks:
+      - dashboard-network
+    depends_on:
+      - mysql
+    profiles:
+      - all
+      - base
+      - database
+      - mysql
+      - phpmyadmin
+
+  # Grafana
+  # https://grafana.com/docs/grafana/latest/
   grafana:
-    image: docker.io/grafana/grafana:latest
+    image: ${REGISTRY:-docker.io}/${GRAFANA_IMAGE:-grafana/grafana:latest}
     container_name: grafana
     restart: unless-stopped
     environment:
@@ -46,8 +75,12 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USERNAME:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?"Environment variable GRAFANA_ADMIN_PASSWORD is required"}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GRAFANA_MYSQL_PASSWORD: ${MYSQL_PASSWORD:?password is required}
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
     networks:
       - dashboard-network
     ports:
@@ -60,29 +93,6 @@ services:
       timeout: 10s
       retries: 3
     profiles:
+      - all
       - dashboard
-      - testing
-      - staging
-
-  phpmyadmin:
-    image: docker.io/phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:?"Environment variable MYSQL_ROOT_PASSWORD is required"}
-    ports:
-      - "${PMA_PORT:-8989}:80"
-    networks:
-      - dashboard-network
-    depends_on:
-      - mysql
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    profiles:
-      - testing
+      - grafana

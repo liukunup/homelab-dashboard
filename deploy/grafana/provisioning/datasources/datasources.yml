@@ -1,0 +1,19 @@
+# grafana/provisioning/datasources/datasources.yml
+apiVersion: 1
+
+datasources:
+  - name: MySQL
+    type: mysql
+    url: mysql:3306
+    database: dashboard
+    user: dashboard
+    secureJsonData:
+      password: ${GRAFANA_MYSQL_PASSWORD}
+    jsonData:
+      database: grafana
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      tlsSkipVerify: true
+    isDefault: true
