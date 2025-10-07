@@ -149,6 +149,7 @@ CREATE TABLE `deb_online_transaction` (
     `update_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `delete_at` DATETIME DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY uq_trade_no_source (`trade_no`, `source`),
     INDEX idx_transaction_at (`transaction_at`),
     INDEX idx_source (`source`),
     INDEX idx_trade_no (`trade_no`),
@@ -208,16 +209,16 @@ CREATE TABLE `deb_salary` (
 -- 房贷还款表
 --
 
-CREATE TABLE `deb_loan` (
+CREATE TABLE `deb_housing_loan` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录编号',
     `period` INT NOT NULL COMMENT '第N期',
     `organization` VARCHAR(256) NOT NULL COMMENT '服务机构名称',
-    `current_interest_rate` DECIMAL(15,2) NOT NULL CHECK (current_interest_rate > 0) COMMENT '当前年利率(%)',
-    `lpr_spread` DECIMAL(15,2) NOT NULL CHECK (lpr_spread > 0) COMMENT '加点幅度(%)',
-    `actual_principal_interest` DECIMAL(15,2) NOT NULL CHECK (actual_principal_interest > 0) COMMENT '实还本息',
-    `due_principal_interest` DECIMAL(15,2) NOT NULL CHECK (due_principal_interest > 0) COMMENT '应还本息',
-    `actual_principal` DECIMAL(15,2) NOT NULL CHECK (actual_principal > 0) COMMENT '实还本金',
-    `actual_interest` DECIMAL(15,2) NOT NULL CHECK (actual_interest > 0) COMMENT '实还利息',
+    `current_interest_rate` DECIMAL(15,2) NOT NULL COMMENT '当前年利率(%)',
+    `lpr_spread` DECIMAL(15,2) NOT NULL COMMENT '加点幅度(%)',
+    `actual_principal_interest` DECIMAL(15,2) NOT NULL CHECK (actual_principal_interest >= 0) COMMENT '实还本息',
+    `due_principal_interest` DECIMAL(15,2) NOT NULL CHECK (due_principal_interest >= 0) COMMENT '应还本息',
+    `actual_principal` DECIMAL(15,2) NOT NULL CHECK (actual_principal >= 0) COMMENT '实还本金',
+    `actual_interest` DECIMAL(15,2) NOT NULL CHECK (actual_interest >= 0) COMMENT '实还利息',
     `repayment_date` DATE NOT NULL COMMENT '还款日期',
     `actual_interest_payment_date` DATE NOT NULL COMMENT '实际还息日期',
     `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
-# author:      Liu Kun
+# author:      我的代码温柔如风
 # email:       liukunup@outlook.com
-# timestamp:   2025/1/1 18:24:00
-# description: 数据同步器（将各种来源的数据同步到数据库表）
+# create at:   2025/01/01 18:24:00
+# modify at:   2025/10/07 13:12:05
+# description: 数据同步器（将各种来源的线上支付数据同步到数据库表汇总）
 
 import re
 import os
@@ -19,7 +20,7 @@ from dotenv import load_dotenv
 class AbstractSynchronizer:
     """ 同步器的抽象类 """
 
-    # 数据库
+    # 数据库配置参数
     __host = None
     __port = 3306
     __username = None
@@ -44,7 +45,7 @@ class AbstractSynchronizer:
     def update(self, from_datasource, to_table, **kwargs):
         """
         从数据源更新/同步到数据库表
-        :param fr_datasource: 数据源
+        :param from_datasource: 数据源
         :param to_table: 目标数据库表
         :param kwargs: 预处理参数
         :return: 影响行数
@@ -125,7 +126,7 @@ class PaySynchronizer(AbstractSynchronizer):
                 filename = os.path.join(root, file)
                 if re.match(r'微信支付账单\(\d{8}-\d{8}\).csv', file):
                     pay_files.append(['WeChatPay', filename])
-                if re.match(r'微信支付账单流水文件\(\d{8}-\d{8}\).xlsx', file):
+                if re.match(r'微信支付账单流水文件\(\d{8}-\d{8}\)\S+.xlsx', file):
                     pay_files.append(['WeChatPay', filename])
                 if re.match(r'alipay_record_\d{8}_\d{6}.csv', file):
                     pay_files.append(['Alipay', filename])
@@ -136,7 +137,7 @@ class PaySynchronizer(AbstractSynchronizer):
     def update(self, from_datasource, to_table, **kwargs):
         """
         从数据源更新/同步到数据库表
-        :param fr_datasource: 数据源
+        :param from_datasource: 数据源
         :param to_table: 目标数据库表
         :param kwargs: 预处理参数
         :return: 影响行数
@@ -288,7 +289,7 @@ def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', type=str)
     parser.add_argument('--port', type=int, default=3306)
-    parser.add_argument('--username', type=str)
+    parser.add_argument('--username', type=str, default='dashboard')
     parser.add_argument('--password', type=str)
     parser.add_argument('--database', type=str, default='dashboard')
     parser.add_argument('--path', type=str, default='data')
@@ -301,7 +302,7 @@ def app():
     print('-' * 100)
     name = 'HomeLab Dashboard - Synchronizer'
     print(f'[{name}] Usage: python ./scripts/synchronizer.py '
-           '--host localhost --port 3306 --username <username> --password <password> --database dashboard '
+           '--host localhost --port 3306 --username dashboard --password <password> --database dashboard '
            '--path data --type <name>')
     print(f'[{name}] 当前运行路径: {os.getcwd()}')
     print(f'[{name}] 开始执行脚本...')
@@ -313,7 +314,7 @@ def app():
             'name': '支付宝',
             'class': AlipaySynchronizer,
             'datasource': 'alipay',
-            'table': 'transaction',
+            'table': 'deb_online_transaction',
             'kwargs': {
                 'source': 'alipay'
             }
@@ -322,22 +323,22 @@ def app():
             'name': '微信支付',
             'class': WeChatPaySynchronizer,
             'datasource': 'wechatpay',
-            'table': 'transaction',
+            'table': 'deb_online_transaction',
             'kwargs': {
                 'source': 'wechatpay'
             }
         },
         'Salary': {
-            'name': '收入明细',
+            'name': '工资薪金',
             'class': SalarySynchronizer,
-            'datasource': '收入明细.csv',
-            'table': 'salary',
+            'datasource': 'salary.csv',
+            'table': 'deb_salary',
         },
         'HousingLoan': {
             'name': '房屋贷款',
             'class': HousingLoanSynchronizer,
-            'datasource': '已还款明细.csv',
-            'table': 'loan',
+            'datasource': 'housing_loan.csv',
+            'table': 'deb_housing_loan',
         },
     }[args.type]
     print(f'[{name}] 当前同步器: {operator["name"]}')
